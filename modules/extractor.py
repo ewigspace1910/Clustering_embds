@@ -14,7 +14,7 @@ class Extractor(object):
 
     def __init__(self, args) -> None:
         self.model = create_model(name=args.arch, pretrained=False, num_features=args.features, dropout=args.dropout, num_classes=0)
-        self.data_loader = get_data(data_dir=args.dataset_dir, height=args.height, width=args.width, batch_size= args.batch_size, workers=args.workers)
+        self.data_loader = get_data(data_dir=args.data_dir, height=args.height, width=args.width, batch_size= args.batch_size, workers=args.workers)
         self.store_dir = args.store_dir
         # Load from checkpoint
         checkpoint = load_checkpoint(args.resume)
@@ -27,6 +27,6 @@ class Extractor(object):
 
     def extract(self):
         features, _ = extract_features(self.model, self.data_loader)
-        torch.save(osp.join(self.store_dir, "features.pth"))
+        torch.save(features, osp.join(self.store_dir, "features.pth"))
         print("!save all features in {}".format(osp.join(self.store_dir, "features.pth")))
 

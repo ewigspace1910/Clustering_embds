@@ -30,7 +30,9 @@ class ReID_Preprocessor(Dataset):
 
 #unlable image folder
 def _process_dir(dir_path):
+    print("load images from ->{}".format(dir_path))
     folder_paths = [p.path for p in os.scandir(dir_path)]
+    folder_paths = [dir_path] if len(folder_paths) == 0 else folder_paths 
     img_paths = []
     for x in folder_paths:
         img_paths += glob.glob(osp.join(x, '*.jpg'))
@@ -40,6 +42,7 @@ def _process_dir(dir_path):
         camid = int(img_path.split("/")[-2].split("_")[-1])  #/unlabeled_wcam_dataset/bounding_box_test/cam_1/00001.jpg
         dataset.append((img_path, camid))
 
+    print("\t--> include : {} images".format(len(dataset)))
     return dataset
 
 
