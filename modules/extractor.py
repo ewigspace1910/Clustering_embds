@@ -4,9 +4,9 @@ from torch import nn
 from torch.backends import cudnn
 from torch.utils.data import DataLoader
 
-from features_extraction import extract_features, FeatureDatabase,  create_model
-from features_extraction.dataloader import get_data
-from utils.serialization import load_checkpoint, save_checkpoint, copy_state_dict
+from .features_extraction import extract_features, FeatureDatabase,  create_model
+from .features_extraction.dataloader import get_data
+from .utils.serialization import load_checkpoint, save_checkpoint, copy_state_dict
 
 import numpy as np
 
