@@ -1,5 +1,6 @@
 import os
 import glob
+import random
 import os.path as osp
 import torchvision.transforms as T
 from torch.utils.data import DataLoader, Dataset
@@ -43,6 +44,7 @@ def _process_dir(dir_path):
         dataset.append((img_path, camid))
 
     print("\t--> include : {} images".format(len(dataset)))
+    random.shuffle(dataset)
     return dataset
 
 
