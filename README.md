@@ -42,8 +42,28 @@ Model is available:
   - N dicts is assembled to one new feature vector dict.
 - Finally, with new feature vector dict, we apply extra clustering time on it and get last labels.
 
+
 ```python
+#kmeans
 !python s2_ensemble_clustering.py \
     --a kmeans --clusters 1000 \
-    --feature-dir "/stores/features/"
+    --feature-dir "/stores/features/" #for input
+    --store-dir "/stores/ensemble"   #for saving 
 ```
+
+```python
+#dbscan
+!python s2_ensemble_clustering.py \
+    --a dbscan --dbs-eps 0.6 --dbs-min 3\
+    --feature-dir "/stores/features/"
+    --store-dir "/stores/ensemble"
+```
+
+# Update
+
+- <kbd>2022 - 27 Jul</kbd> integrated PCA. To use, set option:
+
+    ```python
+    !!python s2_ensemble_clustering.py  [...other options...] \
+      --n-pca 128
+    ```

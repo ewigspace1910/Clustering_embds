@@ -5,16 +5,23 @@ import random
 import numpy as np
 import torch
 from modules.cluster import get_clustor
+from sklearn.preprocessing import normalize
+from sklearn.decomposition import PCA
 
 
 
 
 def clustering(features_dict, keys, args):
     x = torch.cat([features_dict[f].unsqueeze(0) for f in keys], 0)
-    clustor = get_clustor(name=args.algorithm, num_clusters=args.clusters, seed=args.seed, n_jobs=args.workers)
+    if args.n_pca > 0:
+        x = PCA(n_components=args.n_pca).fit_transform(x)
+    else:  x = normalize(x, axis=1)
+    clustor = get_clustor(name=args.algorithm, seed=args.seed, n_jobs=args.workers, 
+                num_clusters=args.clusters, #kmeans
+                eps=args.dbs_eps, min_samples=args.dbs_min) #dbscan
+
     db = clustor.fit(x)
     labels = db.labels_
-    print(labels)
 
     labels_dict = {k:[labels[i]] for i, k in enumerate(keys)}
     del clustor, db, x
@@ -60,8 +67,10 @@ def run(args):
     final_label_dict = clustering(features_dict=__ensemble_dict, keys=gallery, args=args)
     
     #write2file
-    with open("final_label_dict.o", 'w') as f:
-        for k in final_label_dict: f.write("{}:{}\n".format(k, final_label_dict[k]))
+    # with open("final_label_dict.o", 'w') as f:
+    #     for k in final_label_dict: f.write("{}:{}\n".format(k, final_label_dict[k]))
+    torch.save(final_label_dict, osp.join(args.store_dir, "ensemble_labels.pth"))
+    print("!saved ensemble labels in {}".format(osp.join(args.store_dir, "ensemble_labels.pth")))
 
     
 
@@ -87,12 +96,22 @@ if __name__ == '__main__':
     # data
     parser.add_argument('-a', '--algorithm', type=str, default='kmeans')
     parser.add_argument('--minimum-sample', type=int, default=4, help="min sample in class")
+    ###############
     # cluster
     parser.add_argument('--flag-mulcluster', action='store_true', help="Using multicluster or not")
-    # testing configs
-    parser.add_argument('--clusters', type=int, default=0)
     parser.add_argument('--seed', type=int, default=1)
+    ###Kmeans
+    parser.add_argument('--clusters', type=int, default=0)
+    ###DBsan
+    parser.add_argument('--dbs-eps', type=float, default=0.6, help="eps hyperparameter for dbscan")
+    parser.add_argument('--dbs-min', type=float, default=4, help="min sample hyperparameter for dbscan")
+
+    ########
+    #PCA
+    parser.add_argument('--n-pca', type=int, default=0, help="number components of PCA, if greater than 0, pca is used")
+
     # path
     working_dir = osp.dirname(osp.abspath(__file__))
-    parser.add_argument('--feature-dir', type=str, metavar='PATH',default=osp.join(working_dir, 'store', 'features'))    
+    parser.add_argument('--feature-dir', type=str, metavar='PATH',default=osp.join(working_dir, 'store', 'features'))
+    parser.add_argument('--store-dir', type=str, metavar='PATH',default=osp.join(working_dir, 'store', 'ensembles'))    
     main()
