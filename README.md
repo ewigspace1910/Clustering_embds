@@ -14,14 +14,14 @@ Model is available:
 - Resnet
 - MobileNet
 - OSnet
-- RegNet\
+- RegNet
 
 ```python
 !python s1_extract_features.py \
-    --a resnet50 --feature 512 \
-    --resume "/stores/checkpoints/resnet50.pth"  \ 
-    --data_dir "/stores/data/unlabel_image" \
-    --store_dir "/stores/features/resnet50_feature.pth"
+    --a resnet50 --feature 512 --b 128 \
+    --resume "/stores/checkpoints/resnet50.pth.tar"  \ 
+    --data-dir "/stores/data/unlabel_image" \
+    --store-dir "/stores/features/resnet50_feature.pth"
 
 ```
 
@@ -30,9 +30,9 @@ Model is available:
 
 - In stages, each features dict stored in _pth file_ is clustered then labeled. If we have _N_ feature dicts, we will receive _N_ label dicts
 - Some inherent algorithms:
-  [x] Kmeans
-  [x] DBScan
-  [] Adanet 
+  - [x] Kmeans
+  - [x] DBScan
+  - [ ] Adanet 
 
 
 ## 2. Ensemble Labels
@@ -44,6 +44,6 @@ Model is available:
 
 ```python
 !python s2_ensemble_clustering.py \
-    --a dbscan \
-    --feature_dir "/stores/features/"
+    --a kmeans --clusters 1000 \
+    --feature-dir "/stores/features/"
 ```

@@ -1,3 +1,4 @@
+import os
 import os.path as osp
 import torch
 from torch import nn
@@ -29,6 +30,7 @@ class Extractor(object):
 
     def extract(self):
         features, _ = extract_features(self.model, self.data_loader)
-        torch.save(features, osp.join(self.store_dir, "features.pth"))
+        if not osp.exists(self.store_dir): os.makedirs(self.store_dir)
+        torch.save(features, osp.join(self.store_dir, "{}_features.pth".format(self.arch)))
         print("!save all features in {}".format(osp.join(self.store_dir, "{}_features.pth".format(self.arch))))
 

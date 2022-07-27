@@ -4,7 +4,7 @@ import os.path as osp
 import random
 import numpy as np
 import torch
-from .modules.cluster import get_clustor
+from modules.cluster import get_clustor
 
 
 
@@ -45,7 +45,7 @@ def run(args):
             __flag_init__ = False
         else:
             for k in __ensemble_dict.keys():
-                if k not in labels_dict.leys(): __ensemble_dict[k] += [-9] #random number, do not be confused
+                if k not in labels_dict.keys(): __ensemble_dict[k] += [-9] #random number, do not be confused
                 else: __ensemble_dict[k] += labels_dict[k]
         
         del feature_dict
@@ -76,7 +76,7 @@ def main():
         np.random.seed(args.seed)
         torch.manual_seed(args.seed)
     global __src__
-    __src__ = glob.glob(osp.join(args.features_dict, '*.pth'))
+    __src__ = glob.glob(osp.join(args.feature_dir, '*.pth'))
     assert len(__src__) > 0, "!!!Can't load *.pth,\n !!!Please fix feature_path or fill all feature.pth path into __src__" 
     run(args)
     #loc
@@ -85,8 +85,7 @@ def main():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Clustering features")
     # data
-    parser.add_argument('-a', '--algorithm', type=str, default='dbscan')
-    parser.add_argument('-j', '--workers', type=int, default=4)
+    parser.add_argument('-a', '--algorithm', type=str, default='kmeans')
     parser.add_argument('--minimum-sample', type=int, default=4, help="min sample in class")
     # cluster
     parser.add_argument('--flag-mulcluster', action='store_true', help="Using multicluster or not")
