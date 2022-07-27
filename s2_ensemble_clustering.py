@@ -11,9 +11,9 @@ from sklearn.decomposition import PCA
 
 
 
-def clustering(features_dict, keys, args):
+def clustering(features_dict, keys, args, final=False):
     x = torch.cat([features_dict[f].unsqueeze(0) for f in keys], 0)
-    if args.n_pca > 0:
+    if not final and args.n_pca > 0:
         x = PCA(n_components=args.n_pca).fit_transform(x)
     else:  x = normalize(x, axis=1)
     clustor = get_clustor(name=args.algorithm, seed=args.seed, n_jobs=args.workers, 
