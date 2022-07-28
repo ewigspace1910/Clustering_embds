@@ -20,8 +20,8 @@ from sklearn.cluster import KMeans
 
       
 def pairwise_distance(features, query=None, gallery=None):
-    x = torch.cat([features[f].unsqueeze(0) for f, _, _ in query], 0)
-    y = torch.cat([features[f].unsqueeze(0) for f, _, _ in gallery], 0)
+    x = torch.cat([features[f].unsqueeze(0) for f in query], 0)
+    y = torch.cat([features[f].unsqueeze(0) for f in gallery], 0)
     m, n = x.size(0), y.size(0)
     x = x.view(m, -1)
     y = y.view(n, -1)
@@ -32,7 +32,7 @@ def pairwise_distance(features, query=None, gallery=None):
 
 def clustering_all(distmat_gg, gallery=None, top_k = 15, label_clusters=None, hardmore=False, minimum_sample=2):
     if gallery is not None:
-        gallery_path = [pid for pid,_, _ in gallery]
+        gallery_path = gallery
     else:
         print("error 404")
         exit()
@@ -83,6 +83,7 @@ class DSCluster(object):
     def __init__(self, args):
         super(DSCluster, self).__init__()
         self.args = args
+        assert args.clusters, "if using this mode, set --clusters > 0"
 
     def evaluate(self, features, gallery, rerank=False):
         #distmat, query_features, gallery_features = pairwise_distance(features, query, gallery, metric=metric)
@@ -99,6 +100,6 @@ class DSCluster(object):
         if rerank:
             print('Applying person re-ranking ...')
             distmat = re_ranking(distmat_gg.numpy(), distmat_gg.numpy(), distmat_gg.numpy())
-            results = clustering_all(distmat, gallery=gallery, label_clusters=target_label, minimum_sample=4)   
+            results = clustering_all(distmat, gallery=gallery, label_clusters=target_label, minimum_sample=4, hardmore=self.args.hard_sample)   
           
         return results

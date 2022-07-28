@@ -86,5 +86,7 @@ Model is available:
     #to use rerank clustering
     !!python s2_ensemble_clustering.py  [...other options...] \
       --flag-single-rerank #call this flag
-      --rerank #if set, orginal rerank method is used
+      --clusters 1000 #compulsory option
+      --rerank      #optional, if set, orginal rerank method will be used
+      --hard-sample #optional, if set, selection will be restricted 
     ```

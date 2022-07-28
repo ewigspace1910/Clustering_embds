@@ -93,7 +93,7 @@ def run_restrict_ranking(args):
     feature_dict = torch.load(__src__[0])
     gallery = [k for k in feature_dict.keys()]
     clustor = DSCluster(args)
-    final_label_dict = clustor.evaluate(feature_dict, gallery=gallery, args.rerank)
+    final_label_dict = clustor.evaluate(feature_dict, gallery=gallery, rerank=args.rerank)
     return final_label_dict
 
 
@@ -118,7 +118,7 @@ def main():
         print("run single clustering with rerank mode")
         final_label_dict = run_restrict_ranking(args)
     else:
-        print("run simple clustering"):
+        print("run simple clustering")
         final_label_dict = run_simple(args)
     #save
     if not osp.exists(args.store_dir): os.makedirs(args.store_dir)
@@ -146,6 +146,7 @@ if __name__ == '__main__':
     #reranking clustering
     parser.add_argument('--flag-single-rerank', action='store_true', help="Using only one feature file and rerank clustering")
     parser.add_argument('--rerank', action='store_true', help="Using orginal rerank not")
+    parser.add_argument('--hard-sample', action='store_true', help="Select clusters containing number of samples in specified range")
 
     ########
     #PCA
