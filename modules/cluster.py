@@ -1,6 +1,6 @@
 from sklearn.cluster import DBSCAN, KMeans
 
-names =  ['kmean', 'dbscan']
+names =  ['kmeans', 'dbscan']
 
 def get_clustor(name='dbscan', num_clusters=500, seed=1, eps=0.6, min_samples=3):
     if name in names:
@@ -9,5 +9,4 @@ def get_clustor(name='dbscan', num_clusters=500, seed=1, eps=0.6, min_samples=3)
         elif name == 'kmeans':
             return KMeans(n_clusters=num_clusters, random_state=seed,max_iter=300)
     else:
-        print('Available clustering algorithms:', names)
-        assert False, "incorrect name of algorithms"
+        assert False, "incorrect name of algorithms \n Available clustering algorithms: {}".format(names)

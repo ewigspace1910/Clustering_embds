@@ -1,5 +1,6 @@
 import argparse
 import glob
+import os
 import os.path as osp
 import random
 import numpy as np
@@ -15,10 +16,15 @@ def clustering(features_dict, keys, args, final=False):
     x = torch.cat([features_dict[f].unsqueeze(0) for f in keys], 0)
     if not final and args.n_pca > 0:
         x = PCA(n_components=args.n_pca).fit_transform(x)
-    else:  x = normalize(x, axis=1)
-    clustor = get_clustor(name=args.algorithm, seed=args.seed, n_jobs=args.workers, 
+        clustor = get_clustor(name=args.algorithm, seed=args.seed, 
                 num_clusters=args.clusters, #kmeans
                 eps=args.dbs_eps, min_samples=args.dbs_min) #dbscan
+    else:  
+        x = normalize(x, axis=1)
+        clustor = get_clustor(name=args.algorithm, seed=args.seed, 
+                num_clusters=args.clusters, #kmeans
+                eps=args.dbs_eps / 2, min_samples=args.dbs_min) #dbscan
+
 
     db = clustor.fit(x)
     labels = db.labels_
@@ -64,11 +70,12 @@ def run(args):
         gallery += [k]
         __ensemble_dict[k] = torch.Tensor(__ensemble_dict[k]).float()
     ###Re-Clustering
-    final_label_dict = clustering(features_dict=__ensemble_dict, keys=gallery, args=args)
+    final_label_dict = clustering(features_dict=__ensemble_dict, keys=gallery, args=args, final=True)
     
     #write2file
     # with open("final_label_dict.o", 'w') as f:
     #     for k in final_label_dict: f.write("{}:{}\n".format(k, final_label_dict[k]))
+    if not osp.exists(args.store_dir): os.makedirs(args.store_dir)
     torch.save(final_label_dict, osp.join(args.store_dir, "ensemble_labels.pth"))
     print("!saved ensemble labels in {}".format(osp.join(args.store_dir, "ensemble_labels.pth")))
 
