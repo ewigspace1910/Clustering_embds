@@ -38,7 +38,10 @@ Model is available:
 ## 2. Ensemble Labels
 
 - After early clustering, we use _N_ label dicts to create new feature vector space.
-  - assume that, _i-th_ image  have N labels then we generate _i-th_ new feature vector: $v_i = [\text{label}_1, \text{label}_2, ..., \text{label}_\mathcal{N}]$
+  - assume that, _i-th_ image  have N labels then we generate _i-th_ new feature vector: 
+  
+    $$v_i = [\text{label}_1, \text{label}_2, ..., \text{label}_\mathcal{N}]$$
+
   - N dicts is assembled to one new feature vector dict.
 - Finally, with new feature vector dict, we apply extra clustering time on it and get last labels.
 
@@ -49,6 +52,7 @@ Model is available:
     --a kmeans --clusters 1000 \
     --feature-dir "/stores/features/" #for input
     --store-dir "/stores/ensemble"   #for saving 
+    --flag-ensemble #update 28/07/22
 ```
 
 ```python
@@ -57,6 +61,7 @@ Model is available:
     --a dbscan --dbs-eps 0.6 --dbs-min 3\
     --feature-dir "/stores/features/"
     --store-dir "/stores/ensemble"
+    --flag-ensemble #new!
 ```
 
 # Update
@@ -66,4 +71,20 @@ Model is available:
     ```python
     !!python s2_ensemble_clustering.py  [...other options...] \
       --n-pca 128
+    ```
+- <kbd>2022 - 28 Jul</kbd> integrated reranking, default mode. 
+  - Rerank mode will recompute distance metric, [ref](https://github.com/ewigspace1910/Paper-Notes-Deep-Learning/blob/main/Computer%20Vision/3.Person%20ReID/ReRankwKRE.md) 
+  - To use, set option:
+
+    ```python
+    #to use ensemble clustering
+    !!python s2_ensemble_clustering.py  [...other options...] \
+      --flag-ensemble #call this flag
+    ```
+
+    ```python
+    #to use rerank clustering
+    !!python s2_ensemble_clustering.py  [...other options...] \
+      --flag-single-rerank #call this flag
+      --rerank #if set, orginal rerank method is used
     ```

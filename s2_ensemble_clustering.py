@@ -8,7 +8,7 @@ import torch
 from modules.cluster import get_clustor
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
-
+from modules.clustering.clustering_with_rerank import DSCluster
 
 
 
@@ -35,8 +35,21 @@ def clustering(features_dict, keys, args, final=False):
 
 
 __src__ = []
+
+def run_simple(args):
+    global __src__
+    print("!load -->{}".format(__src__[0]))
+    feature_dict = torch.load(__src__[0])
+    #prepare data
+    gallery = [k for k in feature_dict.keys()]
+
+    #Early clustering
+    final_label_dict = clustering(feature_dict, gallery, args)
+    
+    return final_label_dict
+
 __ensemble_dict = {}
-def run(args):
+def run_ensemble(args):
     global __ensemble_dict
     global __src__
     __flag_init__ = True
@@ -71,15 +84,18 @@ def run(args):
         __ensemble_dict[k] = torch.Tensor(__ensemble_dict[k]).float()
     ###Re-Clustering
     final_label_dict = clustering(features_dict=__ensemble_dict, keys=gallery, args=args, final=True)
-    
-    #write2file
-    # with open("final_label_dict.o", 'w') as f:
-    #     for k in final_label_dict: f.write("{}:{}\n".format(k, final_label_dict[k]))
-    if not osp.exists(args.store_dir): os.makedirs(args.store_dir)
-    torch.save(final_label_dict, osp.join(args.store_dir, "ensemble_labels.pth"))
-    print("!saved ensemble labels in {}".format(osp.join(args.store_dir, "ensemble_labels.pth")))
+    return final_label_dict
 
     
+def run_restrict_ranking(args):
+    global __src__
+    print("!load -->{}".format(__src__[0]))
+    feature_dict = torch.load(__src__[0])
+    gallery = [k for k in feature_dict.keys()]
+    clustor = DSCluster(args)
+    final_label_dict = clustor.evaluate(feature_dict, gallery=gallery, args.rerank)
+    return final_label_dict
+
 
 
 def main():
@@ -94,8 +110,21 @@ def main():
     global __src__
     __src__ = glob.glob(osp.join(args.feature_dir, '*.pth'))
     assert len(__src__) > 0, "!!!Can't load *.pth,\n !!!Please fix feature_path or fill all feature.pth path into __src__" 
-    run(args)
-    #loc
+    
+    if args.flag_ensemble:
+        print("run ensemble clustering mode")
+        final_label_dict = run_ensemble(args)
+    elif args.flag_single_rerank:
+        print("run single clustering with rerank mode")
+        final_label_dict = run_restrict_ranking(args)
+    else:
+        print("run simple clustering"):
+        final_label_dict = run_simple(args)
+    #save
+    if not osp.exists(args.store_dir): os.makedirs(args.store_dir)
+    torch.save(final_label_dict, osp.join(args.store_dir, "ensemble_labels.pth"))
+    print("!saved ensemble labels in {}".format(osp.join(args.store_dir, "ensemble_labels.pth")))
+   
 
 
 if __name__ == '__main__':
@@ -104,14 +133,19 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--algorithm', type=str, default='kmeans')
     parser.add_argument('--minimum-sample', type=int, default=4, help="min sample in class")
     ###############
-    # cluster
-    parser.add_argument('--flag-mulcluster', action='store_true', help="Using multicluster or not")
+    # ensemble clustering
+    parser.add_argument('--flag-ensemble', action='store_true', help="Using multicluster or not")
     parser.add_argument('--seed', type=int, default=1)
     ###Kmeans
     parser.add_argument('--clusters', type=int, default=0)
     ###DBsan
     parser.add_argument('--dbs-eps', type=float, default=0.6, help="eps hyperparameter for dbscan")
     parser.add_argument('--dbs-min', type=float, default=4, help="min sample hyperparameter for dbscan")
+
+    ########
+    #reranking clustering
+    parser.add_argument('--flag-single-rerank', action='store_true', help="Using only one feature file and rerank clustering")
+    parser.add_argument('--rerank', action='store_true', help="Using orginal rerank not")
 
     ########
     #PCA
